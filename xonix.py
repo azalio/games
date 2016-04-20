@@ -3,7 +3,7 @@
 import curses
 import locale
 import time
-from random import randint
+from random import randint, choice
 
 
 class XonixBoard:
@@ -37,7 +37,7 @@ class XonixBoard:
             self.scr.addstr(y, self.X-2, '|')
         self.scr.refresh()
 
-    def generate_balls(self, number_of_balls=1):
+    def generate_balls(self, number_of_balls=5):
         for i in range(number_of_balls):
             self.balls.append((randint(4, self.Y-1), randint(4, self.X-7),
                                randint(0, 7)))  # N - 0, E - 2, S - 4, W - 6
@@ -53,34 +53,34 @@ class XonixBoard:
             coord = "Y = {}, X = {}, Z = {}".format(y, x, z)
             self.scr.addstr(self.Y+2, 4, coord)
             self.scr.refresh()
-            if y+1 > self.Y:
+            if y+1 > self.Y-2:
                 if z == 3:
-                    z = 7
-                elif z == 4:
-                    z = 0
-                elif z == 5:
                     z = 1
+                elif z == 4:
+                    z = choice([1, 7])
+                elif z == 5:
+                    z = 7
             if y-1 < 4:
                 if z == 0:
-                    z = 4
+                    z = choice([3, 5])
                 elif z == 1:
-                    z = 5
-                elif z == 7:
                     z = 3
-            if x+1 > self.X-7:
-                if z == 1:
+                elif z == 7:
                     z = 5
-                elif z == 2:
-                    z = 6
-                elif z == 3:
+            if x+1 > self.X-4:
+                if z == 1:
                     z = 7
+                elif z == 2:
+                    z = choice([7, 5])
+                elif z == 3:
+                    z = 5
             if x-1 < 4:
                 if z == 5:
-                    z = 1
-                elif z == 6:
-                    z = 2
-                elif z == 7:
                     z = 3
+                elif z == 6:
+                    z = choice([1, 3])
+                elif z == 7:
+                    z = 1
 
             if z == 0:
                 old_y, old_x = self.old_balls[i][:2]
@@ -183,13 +183,13 @@ def keyloop(stdscr):
     board = XonixBoard(subwin, char=ord('*'))
     board.generate_balls()
     while True:
-        time.sleep(0.3)
+        time.sleep(0.09)
         board.game_run()
         pass
 
 
 def main(stdscr):
-    locale.setlocale(locale.LC_ALL, '')
+    locale.setlocale(locale.LC_ALL, 'C')
     keyloop(stdscr)
 
 if __name__ == '__main__':
