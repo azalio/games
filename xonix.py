@@ -16,6 +16,17 @@ class XonixBoard:
         self.X, self.Y = X-2, Y-2-1
         self.balls = []
         self.old_balls = []
+        self.game_cursor = []
+
+        self.external_line_Y_min = 0
+        self.external_line_Y_max = self.Y
+        self.external_line_X_min = 0
+        self.external_line_X_max = self.X
+
+        self.internal_line_Y_min = 3
+        self.internal_line_Y_max = self.Y-1
+        self.internal_line_X_min = 3
+        self.internal_line_X_max = self.X-2
 
         curses.noecho()
         curses.cbreak()
@@ -23,18 +34,23 @@ class XonixBoard:
 
         border_line = '+'+(self.X*'-')+'+'
         self.scr.addstr(0, 0, border_line)
-        self.scr.addstr(self.Y+1, 0, border_line)
-        for y in range(0, self.Y):
+        self.scr.addstr(self.external_line_Y_max+1, 0, border_line)
+        for y in range(0, self.external_line_Y_max):
             self.scr.addstr(1+y, 0, '|')
-            self.scr.addstr(1+y, self.X+1, '|')
+            self.scr.addstr(1+y, self.external_line_X_max+1, '|')
         self.scr.refresh()
 
         border_line = '+'+((self.X-6)*'-')+'+'
-        self.scr.addstr(3, 3, border_line)
-        self.scr.addstr(self.Y-1, 3, border_line)
-        for y in range(3, self.Y):
-            self.scr.addstr(y, 3, '|')
-            self.scr.addstr(y, self.X-2, '|')
+#        self.scr.addstr(3, 3, border_line)
+        self.scr.addstr(self.internal_line_Y_min,
+                        self.internal_line_X_min, border_line)
+#        self.scr.addstr(self.Y-1, 3, border_line)
+        self.scr.addstr(self.internal_line_Y_max,
+                        self.internal_line_X_min, border_line)
+        for y in range(self.internal_line_Y_min, self.Y):
+            self.scr.addstr(y, self.internal_line_X_min, '|')
+#            self.scr.addstr(y, self.X-2, '|')
+            self.scr.addstr(y, self.internal_line_X_max, '|')
         self.scr.refresh()
 
     def generate_balls(self, number_of_balls=5):
@@ -146,6 +162,20 @@ class XonixBoard:
                 self.scr.move(y, x)
                 self.scr.echochar('*')
                 self.balls[i] = (y-1, x-1, z)
+    def get_key(self):
+        self.scr.nodelay(1)
+        c = self.scr.getch()
+        if c != -1:
+            if c == curses.KEY_UP:
+                print "UP"
+            elif c == curses.KEY_DOWN:
+                print "DOWN"
+            elif c == curses.KEY_LEFT:
+                print "LEFT"
+            elif c == curses.KEY_RIGHT:
+                print "RIGHT"
+            else:
+                pass
 
 
 #        curses.curs_set(0)
@@ -185,7 +215,7 @@ def keyloop(stdscr):
     while True:
         time.sleep(0.09)
         board.game_run()
-        pass
+        board.get_key()
 
 
 def main(stdscr):
